@@ -1,0 +1,71 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+#define OFFSET 25
+
+int CodeQuality(char *buf, char *str, int n) //return the length of buf
+{
+	char prech, ch;
+	int  i, count=1, len=0;  //len means the length of buf
+	n--;
+	if( (prech=*str)<33 )
+		return len;
+	for(i=1; (ch=*(str+i))>32; i++)
+	{
+		if(prech==ch)
+			count++;		
+		else
+		{
+			if(count>n) //not >=	
+			{
+				//*(buf+len++)=prech+OFFSET;
+				len+=sprintf(buf+len,"%c%d",prech+OFFSET,count);
+			}
+			else			
+				while( count-- >0 )
+					*(buf+len++)=prech+OFFSET;
+					//sprintf(buf+len,"%c",prech+OFFSET);
+			
+			count=1;
+			prech=ch;
+		}
+	}
+	if(count>n) //not >=			
+		len+=sprintf(buf+len,"%c%d",prech+OFFSET,count);			
+	else			
+		while( count-- >0 )
+			*(buf+len++)=prech+OFFSET;
+	
+	*(buf+len++)=10; //endline
+	return len;
+}
+
+int main(int argc,char *argv[]) 
+{
+	FILE *infp, *outfp;
+	char qualityBuf[8384], codeBuf[8384], tempBuf[8384];
+	int  len, read_count=0;
+
+	infp=fopen(argv[1],"r");
+	//strcpy(argv[1],".txt");
+	outfp=fopen("out.txt","wb");
+	if( !infp || !outfp)
+	{  printf("error open file!\n"); return -1; }
+
+	while( fgets(tempBuf,8384,infp)!=NULL )
+	{
+		fgets(tempBuf,8384,infp);
+		fgets(tempBuf,8384,infp);
+
+		fgets(qualityBuf, 8384, infp);
+		if(qualityBuf) //there is a short read
+		{
+			read_count++;			
+			len=CodeQuality(codeBuf, qualityBuf, 4); 
+			len=fwrite(codeBuf,1,len,outfp);
+			//fprintf(outfp,"%s",codeBuf); 
+		}		
+	}
+	fclose(infp); fclose(outfp);
+	return 0;
+}
